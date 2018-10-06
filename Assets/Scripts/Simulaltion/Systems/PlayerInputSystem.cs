@@ -14,18 +14,23 @@ namespace Systems
     {
         private struct Filter
         {
-            public PlayerInput PlayerInput;
+            public ComponentDataArray<PlayerInput> PlayerInput;
+            public readonly int Length;
         }
+
+        [Inject] Filter Group;
 
         protected override void OnUpdate()
         {
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
 
-            foreach (Filter entity in GetEntities<Filter>())
+            for (int i = 0; i < Group.Length; ++i)
             {
-                entity.PlayerInput.Horizontal = horizontal;
-                entity.PlayerInput.Vertical = vertical;
+                PlayerInput inp = Group.PlayerInput[i];
+                inp.Horizontal = horizontal;
+                inp.Vertical = vertical;
+                Group.PlayerInput[i] = inp;
             }
         }
     }

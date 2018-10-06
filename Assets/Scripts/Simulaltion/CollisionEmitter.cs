@@ -9,6 +9,11 @@ public class CollisionEmitter : MonoBehaviour
         emit(other.gameObject);   
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        emit(collision.gameObject);
+    }
+
     private void emit(GameObject other)
     {
         GameObjectEntity otherGameObjectEntity = other.GetComponent<GameObjectEntity>();
@@ -23,7 +28,7 @@ public class CollisionEmitter : MonoBehaviour
         entityManager.SetComponentData(collisionEventEntity, new CollisionComponent
         {
             source = sourceEntity,
-            other = otherGameObjectEntity.Entity,
+            target = otherGameObjectEntity.Entity,
         });
     }
 }

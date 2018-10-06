@@ -17,17 +17,20 @@ namespace Systems
     {
         private struct Filter
         {
-            public PlayerInput PlayerInput;
-            public MotionInput MotionInput;
+            public ComponentDataArray<PlayerInput> PlayerInput;
+            public ComponentArray<MotionInput> MotionInput;
+            public readonly int Length;
         }
+
+        [Inject] Filter Group;
 
         protected override void OnUpdate()
         {
-            // Override the network outputs with manual ones
-            foreach (Filter entity in GetEntities<Filter>())
+            for (int i = 0; i < Group.Length; ++i)
             {
-                entity.MotionInput.Horizontal = entity.PlayerInput.Horizontal;
-                entity.MotionInput.Vertical = entity.PlayerInput.Vertical;
+                MotionInput mot = Group.MotionInput[i];
+                mot.Horizontal = Group.PlayerInput[i].Horizontal;
+                mot.Vertical = Group.PlayerInput[i].Vertical;
             }
         }
     }

@@ -5,33 +5,34 @@ using UnityEngine;
 public class Controllable : MonoBehaviour {
     public Color controlledColor = new Color(255, 128, 128);
     public MaterialController materialController;
+    private GameObjectEntity goe;
+
+    public void Start()
+    {
+        goe = GetComponent<GameObjectEntity>();
+    }
 
     public void TakePlayerControl()
     {
-        if (GetComponent<PlayerInput>() == null)
+        if (!goe.EntityManager.HasComponent<PlayerInput>(goe.Entity))
         {
-            gameObject.AddComponent<PlayerInput>();
-            gameObject.SetActive(false);
-            gameObject.SetActive(true);
+            goe.EntityManager.AddComponentData<PlayerInput>(goe.Entity, new PlayerInput());
             materialController.SetBaseColor(controlledColor);
         }
     }
 
     public void ReleasePlayerControl()
     {
-        PlayerInput playerInput = GetComponent<PlayerInput>();
-        if (playerInput != null)
+        if (goe.EntityManager.HasComponent<PlayerInput>(goe.Entity))
         {
-            DestroyImmediate(playerInput);
-            gameObject.SetActive(false);
-            gameObject.SetActive(true);
+            goe.EntityManager.RemoveComponent<PlayerInput>(goe.Entity);
             materialController.ResetBaseColor();
         }
     }
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.Escape) && GetComponent<PlayerInput>())
+        if (Input.GetKey(KeyCode.Escape))
         {
             ReleasePlayerControl();
         }

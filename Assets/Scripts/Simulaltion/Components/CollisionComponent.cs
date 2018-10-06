@@ -6,5 +6,5 @@ using UnityEngine;
 struct CollisionComponent : IComponentData
 {
     public Entity source;
-    public Entity other;
+    public Entity target;
 }

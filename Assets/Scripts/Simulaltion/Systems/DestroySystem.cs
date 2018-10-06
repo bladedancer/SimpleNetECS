@@ -10,7 +10,6 @@ using UnityEngine;
 
 namespace Systems
 {
-    [UpdateAfter(typeof(CollisionSystem))]
     class DestroySystem : ComponentSystem
     {
         private struct Filter
