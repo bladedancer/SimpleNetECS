@@ -11,7 +11,7 @@ using UnityEngine;
 namespace Systems
 {
     [UpdateBefore(typeof(DestroySystem))]
-    class MetabolismSystem : ComponentSystem
+    class FitnessSystem : ComponentSystem
     {
         private struct Filter
         {
@@ -25,18 +25,11 @@ namespace Systems
 
         protected override void OnUpdate()
         {
-            // TODO penalize complexity
             for (int i = 0; i < group.Length; i++)
             {
                 Stats stats = group.Stats[i];
-                stats.Age += Time.deltaTime; // Probably wrong
-                stats.Health -= group.Metabolism[i].HealthDecayRate * Time.deltaTime;
+                stats.Fitness = stats.Age;
                 PostUpdateCommands.SetComponent<Stats>(group.Entity[i], stats);
-
-                if (stats.Health <= 0)
-                {
-                    PostUpdateCommands.AddComponent<Destroy>(group.Entity[i], new Destroy());
-                }
             }
         }
     }

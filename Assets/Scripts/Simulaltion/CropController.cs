@@ -15,9 +15,12 @@ public class CropController : MonoBehaviour {
         // Stats
         Stats stats = new Stats
         {
+            Tag = gameObject.tag.GetHashCode(),
             Age = 0,
             Aggression = 0,
-            Nutrition = InitialNutrition
+            Nutrition = InitialNutrition,
+            MatingAge = float.MaxValue,
+            MatingCost = 0
         };
         gameObjectEntity.EntityManager.AddComponentData<Stats>(gameObjectEntity.Entity, stats);
     }

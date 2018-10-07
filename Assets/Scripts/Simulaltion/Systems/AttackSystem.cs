@@ -39,7 +39,8 @@ namespace Systems
                     if (sourceStats.Aggression > targetStats.Aggression)
                     {
                         // Eaten
-                        // TODO STATS UPDATE
+                        sourceStats.Health += targetStats.Nutrition;
+                        PostUpdateCommands.SetComponent<Stats>(data.source, sourceStats);
                         PostUpdateCommands.AddComponent<Destroy>(data.target, new Destroy());
                     }
                 }

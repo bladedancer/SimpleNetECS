@@ -8,6 +8,9 @@ public class HerbivoreController : MonoBehaviour {
     public float InitialHealth = 100;
     public float InitialAggression = 1;
     public float InitialNutrition = 25;
+    public float MatingAge = 20;
+    public float MatingCost = 25;
+    public float MatingCoolDown = 5;
     public int[] HiddenLayerSizes = new int[0];
     public DistanceSensor[] DistanceSensors;
     private GameObjectEntity gameObjectEntity;
@@ -62,14 +65,17 @@ public class HerbivoreController : MonoBehaviour {
         // Stats
         Stats stats = new Stats
         {
+            Tag = gameObject.tag.GetHashCode(),
             Health = InitialHealth,
             Age = 0,
+            Generation = 0,
             Aggression = InitialAggression,
-            Nutrition = InitialNutrition
+            Nutrition = InitialNutrition,
+            MatingAge = MatingAge,
+            MatingCost = MatingCost,
+            MatingCoolDown = MatingCoolDown
         };
         gameObjectEntity.EntityManager.AddComponentData<Stats>(gameObjectEntity.Entity, stats);
-
-        // TODO FITNESS
     }
 
     private int netSize(NetData net)

@@ -151,7 +151,7 @@ GameObject:
   - component: {fileID: 114831023252195314}
   m_Layer: 9
   m_Name: NetCow
-  m_TagString: Untagged
+  m_TagString: Cow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -233,14 +233,14 @@ Rigidbody:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1914483693714264}
   serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_Mass: 10
+  m_Drag: 1
+  m_AngularDrag: 1
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 84
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
 --- !u!65 &65120222481018728
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -382,6 +382,9 @@ MonoBehaviour:
   InitialHealth: 100
   InitialAggression: 1
   InitialNutrition: 25
+  MatingAge: 20
+  MatingCost: 25
+  MatingCoolDown: 5
   HiddenLayerSizes: 0a00000005000000
   DistanceSensors:
   - Layers:

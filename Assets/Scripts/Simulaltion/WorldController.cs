@@ -1,12 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Systems;
 using UnityEngine;
 
-public class WorldController : MonoBehaviour {
 
+public class WorldController : MonoBehaviour {
+    public List<GameObject> Prefabs = new List<GameObject>();
+    public Transform Container;
     private Controllable possessed;
 
-	void Start () {
+    private void Awake()
+    {
+        foreach (GameObject prefab in Prefabs)
+        {
+            BirthSystem.Prefabs.Add(prefab.tag.GetHashCode(), prefab);
+        }
+    }
+
+    void Start () {
 		
 	}
 

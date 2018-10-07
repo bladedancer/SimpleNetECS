@@ -20,7 +20,8 @@ public class SpawnBase : MonoBehaviour
                 prefab.transform.position.y,
                 Random.Range(-lengthBound, lengthBound)
             );
-            Instantiate(prefab, position, Quaternion.identity, parent);
+            GameObject obj = Instantiate(prefab, position, Quaternion.identity, parent);
+            obj.name = prefab.name + " Gen-0 (" + parent.childCount + ")";
         }
     }
 }

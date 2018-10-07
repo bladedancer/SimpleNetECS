@@ -5,7 +5,8 @@ using UnityEngine;
 
 namespace Components
 {
-    struct Destroy : IComponentData
+    struct Parent : IComponentData
     {
+        public float CoolDown;
     }
 }
