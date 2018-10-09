@@ -62,36 +62,20 @@ namespace Systems
                 return;
             }
 
-            /*
             // Batch'em
-            NativeArray<RaycastHit> results = new NativeArray<RaycastHit>(sensorBatchItems.Count, Allocator.Temp);
-            NativeArray<RaycastCommand> commands = new NativeArray<RaycastCommand>(sensorBatchItems.Count, Allocator.Temp);
-
-            foreach (SensorBatchItem item in sensorBatchItems) {
-                Vector3 dir = item.Transform.TransformDirection(new Vector3(item.Sensor.Direction.x, 0, item.Sensor.Direction.z)).normalized;
-                Vector3 raySrc = item.Transform.position + (item.Transform.right * item.Sensor.Origin.x) + (item.Transform.forward * item.Sensor.Origin.z) + (item.Transform.up * item.Sensor.Origin.y);
-                Debug.DrawRay(raySrc, dir * item.Sensor.MaxDistance);
-                commands[item.BatchIndex] = new RaycastCommand(raySrc, dir, item.Sensor.MaxDistance);
-            }
-
-            // Schedule the batch of raycasts
-            var handle = RaycastCommand.ScheduleBatch(commands, results, 64);
-            */
-
-            // Batch'em
-            NativeArray<RaycastHit> results = new NativeArray<RaycastHit>(sensorBatchItems.Count, Allocator.Temp);
-            NativeArray<RaycastCommand> commands = new NativeArray<RaycastCommand>(sensorBatchItems.Count, Allocator.Temp);
+            NativeArray<RaycastHit> results = new NativeArray<RaycastHit>(sensorBatchItems.Count, Allocator.TempJob);
+            NativeArray<BoxcastCommand> commands = new NativeArray<BoxcastCommand>(sensorBatchItems.Count, Allocator.TempJob);
 
             foreach (SensorBatchItem item in sensorBatchItems)
             {
                 Vector3 dir = item.Transform.TransformDirection(new Vector3(item.Sensor.Direction.x, 0, item.Sensor.Direction.z)).normalized;
                 Vector3 raySrc = item.Transform.position + (item.Transform.right * item.Sensor.Origin.x) + (item.Transform.forward * item.Sensor.Origin.z) + (item.Transform.up * item.Sensor.Origin.y);
                 Debug.DrawRay(raySrc, dir * item.Sensor.MaxDistance);
-                commands[item.BatchIndex] = new RaycastCommand(raySrc, dir, item.Sensor.MaxDistance);
+                commands[item.BatchIndex] = new BoxcastCommand(raySrc, item.Sensor.Extents, Quaternion.identity, dir, item.Sensor.MaxDistance);
             }
 
             // Schedule the batch of raycasts
-            var handle = RaycastCommand.ScheduleBatch(commands, results, 64);
+            var handle = BoxcastCommand.ScheduleBatch(commands, results, 64);
 
             // Wait for the batch processing job to complete
             handle.Complete();
@@ -104,6 +88,8 @@ namespace Systems
 
                 if (hit.transform != null)
                 {
+                    // TODO DETECT WHAT YOU HIT
+                    // Debug.Log("HIT (" + item.ResultIndex + ") " + hit.collider.tag + " at " + hit.distance);
                     item.SensorData.Data[item.ResultIndex] = 1 - (hit.distance / item.Sensor.MaxDistance);
                 }
                 else
