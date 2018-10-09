@@ -62,11 +62,28 @@ namespace Systems
                 return;
             }
 
+            /*
             // Batch'em
             NativeArray<RaycastHit> results = new NativeArray<RaycastHit>(sensorBatchItems.Count, Allocator.Temp);
             NativeArray<RaycastCommand> commands = new NativeArray<RaycastCommand>(sensorBatchItems.Count, Allocator.Temp);
 
             foreach (SensorBatchItem item in sensorBatchItems) {
+                Vector3 dir = item.Transform.TransformDirection(new Vector3(item.Sensor.Direction.x, 0, item.Sensor.Direction.z)).normalized;
+                Vector3 raySrc = item.Transform.position + (item.Transform.right * item.Sensor.Origin.x) + (item.Transform.forward * item.Sensor.Origin.z) + (item.Transform.up * item.Sensor.Origin.y);
+                Debug.DrawRay(raySrc, dir * item.Sensor.MaxDistance);
+                commands[item.BatchIndex] = new RaycastCommand(raySrc, dir, item.Sensor.MaxDistance);
+            }
+
+            // Schedule the batch of raycasts
+            var handle = RaycastCommand.ScheduleBatch(commands, results, 64);
+            */
+
+            // Batch'em
+            NativeArray<RaycastHit> results = new NativeArray<RaycastHit>(sensorBatchItems.Count, Allocator.Temp);
+            NativeArray<RaycastCommand> commands = new NativeArray<RaycastCommand>(sensorBatchItems.Count, Allocator.Temp);
+
+            foreach (SensorBatchItem item in sensorBatchItems)
+            {
                 Vector3 dir = item.Transform.TransformDirection(new Vector3(item.Sensor.Direction.x, 0, item.Sensor.Direction.z)).normalized;
                 Vector3 raySrc = item.Transform.position + (item.Transform.right * item.Sensor.Origin.x) + (item.Transform.forward * item.Sensor.Origin.z) + (item.Transform.up * item.Sensor.Origin.y);
                 Debug.DrawRay(raySrc, dir * item.Sensor.MaxDistance);

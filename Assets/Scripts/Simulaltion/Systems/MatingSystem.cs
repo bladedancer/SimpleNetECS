@@ -12,7 +12,8 @@ using UnityEngine;
 
 namespace Systems
 {
-    [UpdateAfter(typeof(DestroySystem))]
+    [UpdateBefore(typeof(DestroySystem))]
+    [UpdateBefore(typeof(CollisionCleanupSystem))]
     class MatingSystem : ComponentSystem
     {
         private struct Group
@@ -36,6 +37,14 @@ namespace Systems
         /// <returns></returns>
         private bool canMate(Stats source, Stats target)
         {
+            /*
+            Debug.Log("" + source.Tag + " == " + target.Tag);
+            Debug.Log("" + source.Fitness + " >= " + target.Fitness);
+            Debug.Log("" + source.Age + " >= " + source.MatingAge);
+            Debug.Log("" + source.Health + " >= " + source.MatingCost);
+            Debug.Log("" + target.Age + " >= " + target.MatingAge);
+            Debug.Log("" + target.Health + " >= " + target.MatingCost);
+            */
             return 
                 source.Tag == target.Tag
                 && source.Fitness >= target.Fitness
@@ -58,24 +67,40 @@ namespace Systems
                     Stats sourceStats = EntityManager.GetComponentData<Stats>(data.source);
                     Stats targetStats = EntityManager.GetComponentData<Stats>(data.target);
 
+                    // Debug.Log("CAN MATE: " + canMate(sourceStats, targetStats));
                     if (canMate(sourceStats, targetStats))
                     {
+                        Net sourceNet = EntityManager.GetComponentObject<Net>(data.source);
+                        Net targetNet = EntityManager.GetComponentObject<Net>(data.target);
+
+                        Debug.Log("WITH CHILD: " + data.source.Index);
                         // Create a child
                         PostUpdateCommands.AddComponent<Embryo>(data.source, new Embryo
                         {
-                            // TODO NET
+                            entity = mate(sourceNet, targetNet)
                         });
 
-                        // Update Parents
+                        // Update Parent (source pays the price)
                         sourceStats.Health -= sourceStats.MatingCost;
-                        targetStats.Health -= targetStats.MatingCost;
                         PostUpdateCommands.SetComponent<Stats>(data.source, sourceStats);
-                        PostUpdateCommands.SetComponent<Stats>(data.target, targetStats);
                         PostUpdateCommands.AddComponent<Parent>(data.source, new Parent { CoolDown = sourceStats.MatingCoolDown });
-                        PostUpdateCommands.AddComponent<Parent>(data.target, new Parent { CoolDown = targetStats.MatingCoolDown });
                     }
                 }
             }
+        }
+
+        private Entity mate(Net mother, Net father)
+        {
+            NetData childNet = Neural.Mutators.RandomMix(new NetData[] {
+                mother.Data,
+                father.Data,
+            }, new Neural.Options() {
+                { "clone", true }
+            }).First();
+
+            Entity child = EntityManager.CreateEntity();
+            EntityManager.AddSharedComponentData(child, childNet);
+            return child;
         }
     }
 }

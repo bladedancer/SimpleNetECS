@@ -3,6 +3,9 @@
     "com.unity.entities": "0.0.12-preview.8",
     "com.unity.shadergraph": "1.1.9-preview",
     "com.unity.render-pipelines.lightweight": "1.1.11-preview",
-    "com.unity.render-pipelines.core": "1.1.11-preview"
+    "com.unity.render-pipelines.core": "1.1.11-preview",
+    "com.unity.ads": "exclude",
+    "com.unity.analytics": "exclude",
+    "com.unity.standardevents": "exclude"
   }
 }

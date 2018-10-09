@@ -5,6 +5,7 @@ using Unity.Entities;
 using UnityEngine;
 
 public class HerbivoreController : MonoBehaviour {
+    #region Prefab Settings
     public float InitialHealth = 100;
     public float InitialAggression = 1;
     public float InitialNutrition = 25;
@@ -14,6 +15,12 @@ public class HerbivoreController : MonoBehaviour {
     public int[] HiddenLayerSizes = new int[0];
     public DistanceSensor[] DistanceSensors;
     private GameObjectEntity gameObjectEntity;
+    #endregion
+
+    #region Mutable Initialization Settings
+    // This is the net the child starts with
+    public NetData InitalNet;
+    #endregion
 
     private void Awake()
     {
@@ -41,19 +48,27 @@ public class HerbivoreController : MonoBehaviour {
 
         // Initialize the layers
         Net net = GetComponent<Net>();
-        net.Data = new NetData();
-        net.Data.LayerSizes = new int[HiddenLayerSizes.Length + 2];
-        net.Data.LayerSizes[0] = sensorData.Data.Length; 
-        HiddenLayerSizes.CopyTo(net.Data.LayerSizes, 1);
-        net.Data.LayerSizes[HiddenLayerSizes.Length + 1] = 2; // MotionInputs
-        net.Data.Weights = new double[netSize(net.Data)];
-        Neural.Mutators.SelfMutate(new NetData[] { net.Data }, new Neural.Options()
+        if (InitalNet.LayerSizes != null)
         {
-            { "clone", false },
-            { "mutationProbability", 1 },
-            { "mutationFactor", 1 },
-            { "mutationRange", 10000 },
-        });
+            Debug.Log("INITIALIZING WITH NET");
+            net.Data = InitalNet;
+        }
+        else
+        {
+            net.Data = new NetData();
+            net.Data.LayerSizes = new int[HiddenLayerSizes.Length + 2];
+            net.Data.LayerSizes[0] = sensorData.Data.Length;
+            HiddenLayerSizes.CopyTo(net.Data.LayerSizes, 1);
+            net.Data.LayerSizes[HiddenLayerSizes.Length + 1] = 2; // MotionInputs
+            net.Data.Weights = new double[netSize(net.Data)];
+            Neural.Mutators.SelfMutate(new NetData[] { net.Data }, new Neural.Options()
+            {
+                { "clone", false },
+                { "mutationProbability", 1 },
+                { "mutationFactor", 1 },
+                { "mutationRange", 10000 },
+            });
+        }
 
         // Mettabolism
         Metabolism metabolism = new Metabolism

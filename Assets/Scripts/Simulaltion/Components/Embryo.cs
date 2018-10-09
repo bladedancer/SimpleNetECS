@@ -7,6 +7,6 @@ namespace Components
 {
     struct Embryo : IComponentData
     {
-        public int Generation;
+        public Entity entity;
     }
 }

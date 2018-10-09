@@ -18,6 +18,7 @@ namespace Systems
         public Transform container;
         public float3 position;
         public int generation;
+        public NetData netData;
     }
 
     [UpdateAfter(typeof(MatingSystem))]
@@ -52,7 +53,7 @@ namespace Systems
                 child.container = transform.parent;
                 child.position = transform.position + new Vector3(1, 0, 1);
                 child.generation = stats.Generation + 1;
-                // TODO NET
+                child.netData = EntityManager.GetSharedComponentData<NetData>(embryo.entity);
                 children.Add(child);
                 PostUpdateCommands.RemoveComponent<Embryo>(Data.Entities[i]);
             }
@@ -60,9 +61,11 @@ namespace Systems
             // Spawn the children
             foreach(ChildInfo child in children)
             {
+                // TODO MAKE GENERIC NET INITIALIZATION RATHER THAN HERBIVORE
+                Debug.Log("CREATING CHILD");
                 GameObject obj = GameObject.Instantiate(Prefabs[child.tag], child.position, Quaternion.identity, child.container);
+                obj.GetComponent<HerbivoreController>().InitalNet = child.netData;
                 obj.name = Prefabs[child.tag].name + " Gen-" + child.generation + " (" + child.container.childCount + ")";
-                // TODO INIT CHILD
             }
         }
     }

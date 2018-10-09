@@ -10,6 +10,7 @@ using UnityEngine;
 
 namespace Systems
 {
+    [UpdateBefore(typeof(UnityEngine.Experimental.PlayerLoop.FixedUpdate))]
     class MovementSystem : ComponentSystem
     {
         private struct Filter

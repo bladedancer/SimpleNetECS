@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Components
 {
-    public struct NetData
+    public struct NetData : ISharedComponentData
     {
         /// <summary>
         /// The array of layer sizes. The first layer is the input and the last layer is the output.
