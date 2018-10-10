@@ -73,7 +73,7 @@ namespace Systems
                         Net sourceNet = EntityManager.GetComponentObject<Net>(data.source);
                         Net targetNet = EntityManager.GetComponentObject<Net>(data.target);
 
-                        Debug.Log("WITH CHILD: " + data.source.Index);
+                        // Debug.Log("WITH CHILD: " + data.source.Index);
                         // Create a child
                         PostUpdateCommands.AddComponent<Embryo>(data.source, new Embryo
                         {

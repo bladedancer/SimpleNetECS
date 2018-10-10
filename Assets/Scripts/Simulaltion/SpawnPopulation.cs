@@ -5,6 +5,9 @@ using UnityEngine;
 // Maintain a constant population.
 public class SpawnPopulation : SpawnBase{
     public float population;
+    public float cooldown;
+
+    private float lastUpdate = float.MinValue;
 
 	void Start () {
         Fill();
@@ -12,6 +15,11 @@ public class SpawnPopulation : SpawnBase{
 	
 	// Update is called once per frame
 	void Update () {
+        if (Time.time <= lastUpdate + cooldown)
+        {
+            return;
+        }
+        lastUpdate = Time.time;
         Fill();
     }
 

@@ -1,10 +1,13 @@
-﻿using System.Collections;
+﻿using Components;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 // Spawn Prefabs.
 public class SpawnBase : MonoBehaviour
 {
+    public SimulationController controller;
+
     public Transform parent;
     public GameObject prefab;
     public GroundGenerator ground;
@@ -22,6 +25,16 @@ public class SpawnBase : MonoBehaviour
             );
             GameObject obj = Instantiate(prefab, position, Quaternion.identity, parent);
             obj.name = prefab.name + " Gen-0 (" + parent.childCount + ")";
+
+            // TODO GENERIC
+            if (controller != null && controller.Fittest.HasValue)
+            {
+                Fittest fittest = controller.Fittest.Value;
+                if (fittest.tag == obj.tag.GetHashCode() && fittest.fitness > 0)
+                {
+                    obj.GetComponent<HerbivoreController>().InitalNet = fittest.net;
+                }
+            }
         }
     }
 }

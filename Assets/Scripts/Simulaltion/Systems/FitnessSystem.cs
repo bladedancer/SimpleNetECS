@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Systems
 {
-    [UpdateBefore(typeof(DestroySystem))]
+    [UpdateBefore(typeof(SaveSystem))]
     class FitnessSystem : ComponentSystem
     {
         private struct Filter

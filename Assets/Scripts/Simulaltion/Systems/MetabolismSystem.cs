@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Systems
 {
-    [UpdateBefore(typeof(DestroySystem))]
+    [UpdateBefore(typeof(UnityEngine.Experimental.PlayerLoop.FixedUpdate))]
     class MetabolismSystem : ComponentSystem
     {
         private struct Filter
@@ -29,11 +29,15 @@ namespace Systems
             for (int i = 0; i < group.Length; i++)
             {
                 Stats stats = group.Stats[i];
-                stats.Age += Time.deltaTime; // Probably wrong
-                stats.Health -= group.Metabolism[i].HealthDecayRate * Time.deltaTime;
+                Metabolism meta = group.Metabolism[i];
+
+                stats.Age += Time.fixedDeltaTime;
+                stats.TimeSinceLastMeal += Time.fixedDeltaTime;
+                stats.Health -= (meta.HealthDecayRate * Time.fixedDeltaTime) * Mathf.Floor(1.0f + (stats.TimeSinceLastMeal/meta.MealtimeInterval));
+
                 PostUpdateCommands.SetComponent<Stats>(group.Entity[i], stats);
 
-                if (stats.Health <= 0)
+                if (stats.Health <= 0 && !EntityManager.HasComponent<Destroy>(group.Entity[i]))
                 {
                     PostUpdateCommands.AddComponent<Destroy>(group.Entity[i], new Destroy());
                 }

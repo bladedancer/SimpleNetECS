@@ -9,6 +9,7 @@ public class HerbivoreController : MonoBehaviour {
     public float InitialHealth = 100;
     public float InitialAggression = 1;
     public float InitialNutrition = 25;
+    public float InitialMealtimeInterval = 5;
     public float MatingAge = 20;
     public float MatingCost = 25;
     public float MatingCoolDown = 5;
@@ -50,7 +51,7 @@ public class HerbivoreController : MonoBehaviour {
         Net net = GetComponent<Net>();
         if (InitalNet.LayerSizes != null)
         {
-            Debug.Log("INITIALIZING WITH NET");
+            // Debug.Log("INITIALIZING WITH NET");
             net.Data = InitalNet;
         }
         else
@@ -73,7 +74,8 @@ public class HerbivoreController : MonoBehaviour {
         // Mettabolism
         Metabolism metabolism = new Metabolism
         {
-            HealthDecayRate = 1
+            HealthDecayRate = 1,
+            MealtimeInterval = InitialMealtimeInterval
         };
         gameObjectEntity.EntityManager.AddComponentData<Metabolism>(gameObjectEntity.Entity, metabolism);
 

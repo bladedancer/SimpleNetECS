@@ -62,7 +62,7 @@ namespace Systems
             foreach(ChildInfo child in children)
             {
                 // TODO MAKE GENERIC NET INITIALIZATION RATHER THAN HERBIVORE
-                Debug.Log("CREATING CHILD");
+                // Debug.Log("CREATING CHILD");
                 GameObject obj = GameObject.Instantiate(Prefabs[child.tag], child.position, Quaternion.identity, child.container);
                 obj.GetComponent<HerbivoreController>().InitalNet = child.netData;
                 obj.name = Prefabs[child.tag].name + " Gen-" + child.generation + " (" + child.container.childCount + ")";

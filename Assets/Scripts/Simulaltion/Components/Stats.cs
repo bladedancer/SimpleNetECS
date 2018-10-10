@@ -12,6 +12,8 @@ namespace Components
         public float Health;
         public float Age;
 
+        public float TimeSinceLastMeal;
+
         public int Generation;
 
         // What someone gets by eatting this
@@ -23,5 +25,6 @@ namespace Components
         public float MatingAge;
         public float MatingCost;
         public float MatingCoolDown;
+
     }
 }

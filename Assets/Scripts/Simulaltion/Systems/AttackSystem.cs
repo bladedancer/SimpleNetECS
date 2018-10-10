@@ -38,8 +38,13 @@ namespace Systems
 
                     if (sourceStats.Aggression > targetStats.Aggression)
                     {
-                        // Eaten
+                        // Eating
                         sourceStats.Health += targetStats.Nutrition;
+                        sourceStats.TimeSinceLastMeal = 0;
+
+                        // TODO: Better refactor of fitness contributions. For now - eat more get fitter.
+                        sourceStats.Fitness += targetStats.Nutrition;
+
                         PostUpdateCommands.SetComponent<Stats>(data.source, sourceStats);
                         PostUpdateCommands.AddComponent<Destroy>(data.target, new Destroy());
                     }

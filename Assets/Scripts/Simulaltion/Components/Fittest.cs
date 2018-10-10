@@ -5,9 +5,10 @@ using UnityEngine;
 
 namespace Components
 {
-    struct CollisionComponent : IComponentData
+    public struct Fittest : ISharedComponentData
     {
-        public Entity source;
-        public Entity target;
+        public NetData net;
+        public float fitness;
+        public int tag;
     }
 }
