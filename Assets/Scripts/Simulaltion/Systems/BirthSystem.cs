@@ -28,9 +28,9 @@ namespace Systems
 
         private struct Group
         {
-            public ComponentDataArray<Embryo> Embryo;
+            [ReadOnly] public SharedComponentDataArray<Embryo> Embryo;
             public ComponentDataArray<Stats> Stats;
-            readonly public ComponentArray<Transform> Transform;
+            [ReadOnly] public ComponentArray<Transform> Transform;
             readonly public EntityArray Entities;
             readonly public int Length;
         }
@@ -53,8 +53,9 @@ namespace Systems
                 child.container = transform.parent;
                 child.position = transform.position + new Vector3(1, 0, 1);
                 child.generation = stats.Generation + 1;
-                child.netData = EntityManager.GetSharedComponentData<NetData>(embryo.entity);
+                child.netData = embryo.netdata;
                 children.Add(child);
+                PostUpdateCommands.SetComponent<Stats>(Data.Entities[i], stats);
                 PostUpdateCommands.RemoveComponent<Embryo>(Data.Entities[i]);
             }
 

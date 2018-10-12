@@ -75,9 +75,9 @@ namespace Systems
 
                         // Debug.Log("WITH CHILD: " + data.source.Index);
                         // Create a child
-                        PostUpdateCommands.AddComponent<Embryo>(data.source, new Embryo
+                        PostUpdateCommands.AddSharedComponent<Embryo>(data.source, new Embryo
                         {
-                            entity = mate(sourceNet, targetNet)
+                            netdata = mate(sourceNet, targetNet)
                         });
 
                         // Update Parent (source pays the price)
@@ -89,18 +89,14 @@ namespace Systems
             }
         }
 
-        private Entity mate(Net mother, Net father)
+        private NetData mate(Net mother, Net father)
         {
-            NetData childNet = Neural.Mutators.RandomMix(new NetData[] {
+            return Neural.Mutators.RandomMix(new NetData[] {
                 mother.Data,
                 father.Data,
             }, new Neural.Options() {
                 { "clone", true }
             }).First();
-
-            Entity child = EntityManager.CreateEntity();
-            EntityManager.AddSharedComponentData(child, childNet);
-            return child;
         }
     }
 }

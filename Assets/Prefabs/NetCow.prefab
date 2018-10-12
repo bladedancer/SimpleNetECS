@@ -609,10 +609,11 @@ MonoBehaviour:
   InitialHealth: 100
   InitialAggression: 1
   InitialNutrition: 25
+  InitialMealtimeInterval: 5
   MatingAge: 16
   MatingCost: 20
   MatingCoolDown: 5
-  HiddenLayerSizes: 32000000190000000a000000
+  HiddenLayerSizes: 1000000008000000
   DistanceSensors:
   - Layers:
     - Player

@@ -5,8 +5,8 @@ using UnityEngine;
 
 namespace Components
 {
-    struct Embryo : IComponentData
+    struct Embryo : ISharedComponentData
     {
-        public Entity entity;
+        public NetData netdata;
     }
 }

@@ -15,58 +15,69 @@ using UnityEngine.Jobs;
 namespace Systems
 {
     class SensorSystem : ComponentSystem {
+        /// <summary>
+        /// What do we measure in distance sensors:
+        /// relativeDistance, relativeAggression, relativeFitness
+        /// </summary>
+        public static int DATA_POINTS_PER_DISTANCE_SENSOR = 3;
+
         private struct Filter
         {
-            public Transform Transform;
-            public Sensors Sensors;
-            public SensorData SensorData;
+            [ReadOnly] public ComponentDataArray<Stats> Stats;
+            [ReadOnly] public ComponentArray<Transform> Transform;
+            [ReadOnly] public ComponentArray<Sensors> Sensors;
+            public ComponentArray<SensorData> SensorData;
+            readonly public EntityArray Entities;
+            readonly public int Length;
         }
 
-        struct SensorBatchItem
+        [Inject] private Filter Group;
+
+        /// <summary>
+        /// The information need to batch the raycasts and process the results.
+        /// </summary>
+        struct CastBatchItem
         {
             public int BatchIndex;
             public int ResultIndex;
+            public Stats Stats;
             public Transform Transform;
             public DistanceSensor Sensor;
             public SensorData SensorData;
         }
 
-        protected override void OnUpdate()
+        /// <summary>
+        /// Add the telemetry measurements to the sensor data.
+        /// </summary>
+        /// <param name="sensor">The telemetry sensor details.</param>
+        /// <param name="sensorData">The target sensor data to write to.</param>
+        /// <param name="offset">The offeset to write to.</param>
+        /// <returns>The number of data points written.</returns>
+        private int AddTelemetry(TelemetrySensor sensor, SensorData sensorData, int offset)
         {
-            ComponentGroupArray<Filter> entities = GetEntities<Filter>();
-            if (entities.Length == 0)
+            if (sensor.GetTelemetry != null)
             {
-                return;
-            }
-
-            // How big is the list
-            List<SensorBatchItem> sensorBatchItems = new List<SensorBatchItem>();
-            int batchIndex = 0;
-            foreach (Filter entity in entities)
+                double[] telemetry = sensor.GetTelemetry();
+                telemetry.CopyTo(sensorData.Data, offset);
+                return telemetry.Length;
+            } else
             {
-                for (int i = 0; i < entity.Sensors.DistanceSensors.Length; ++i)
-                {
-                    sensorBatchItems.Add(new SensorBatchItem()
-                    {
-                        BatchIndex = batchIndex++,
-                        ResultIndex = i,
-                        Transform = entity.Transform,
-                        Sensor = entity.Sensors.DistanceSensors[i],
-                        SensorData = entity.SensorData
-                    });
-                }
+                return 0;
             }
+        }
 
-            if (sensorBatchItems.Count == 0)
+        private void AddDistanceSensors(List<CastBatchItem> castBatchItems)
+        {
+            if (castBatchItems.Count == 0)
             {
                 return;
             }
 
             // Batch'em
-            NativeArray<RaycastHit> results = new NativeArray<RaycastHit>(sensorBatchItems.Count, Allocator.TempJob);
-            NativeArray<BoxcastCommand> commands = new NativeArray<BoxcastCommand>(sensorBatchItems.Count, Allocator.TempJob);
+            NativeArray<RaycastHit> results = new NativeArray<RaycastHit>(castBatchItems.Count, Allocator.TempJob);
+            NativeArray<BoxcastCommand> commands = new NativeArray<BoxcastCommand>(castBatchItems.Count, Allocator.TempJob);
 
-            foreach (SensorBatchItem item in sensorBatchItems)
+            foreach (CastBatchItem item in castBatchItems)
             {
                 Vector3 dir = item.Transform.TransformDirection(new Vector3(item.Sensor.Direction.x, 0, item.Sensor.Direction.z)).normalized;
                 Vector3 raySrc = item.Transform.position + (item.Transform.right * item.Sensor.Origin.x) + (item.Transform.forward * item.Sensor.Origin.z) + (item.Transform.up * item.Sensor.Origin.y);
@@ -83,23 +94,80 @@ namespace Systems
             // Update the results
             for (int i = 0; i < results.Length; ++i)
             {
-                SensorBatchItem item = sensorBatchItems[i];
+                CastBatchItem item = castBatchItems[i];
                 RaycastHit hit = results[i];
+
+                double relativeDistance = 0;
+                double relativeAggression = 0;
+                double relativeFitness = 0;
 
                 if (hit.transform != null)
                 {
-                    // TODO DETECT WHAT YOU HIT
-                    // Debug.Log("HIT (" + item.ResultIndex + ") " + hit.collider.tag + " at " + hit.distance);
-                    item.SensorData.Data[item.ResultIndex] = 1 - (hit.distance / item.Sensor.MaxDistance);
+                    // Distance
+                    relativeDistance = 1 - (hit.distance / item.Sensor.MaxDistance);
+
+                    // Relative Stats
+                    GameObjectEntity goe = hit.collider.GetComponent<GameObjectEntity>();
+                    if (goe != null)
+                    {
+                        Stats otherStats = EntityManager.GetComponentData<Stats>(goe.Entity);
+                        
+                        // Aggression
+                        relativeAggression = item.Stats.Aggression != 0 
+                            ? Math.Tanh((otherStats.Aggression/item.Stats.Aggression) - 1) 
+                            : Math.Tanh(otherStats.Aggression);
+
+                        // Fitness
+                        if (item.Stats.Tag == otherStats.Tag)
+                        {
+                            relativeFitness = item.Stats.Fitness != 0
+                                ? Math.Tanh((otherStats.Fitness / item.Stats.Fitness) - 1)
+                                : Math.Tanh(otherStats.Fitness);
+                        }
+                        else
+                        {
+                            relativeFitness = -1;
+                        }
+                    }
                 }
-                else
-                {
-                    item.SensorData.Data[item.ResultIndex] = 0;
-                }
+
+                item.SensorData.Data[item.ResultIndex + 0] = relativeDistance;
+                item.SensorData.Data[item.ResultIndex + 1] = relativeAggression;
+                item.SensorData.Data[item.ResultIndex + 2] = relativeFitness;
             }
+
             // Dispose the buffers
             results.Dispose();
             commands.Dispose();
+            return;
+        }
+
+        protected override void OnUpdate()
+        {
+            List<CastBatchItem> castBatchItems = new List<CastBatchItem>();
+            int batchIndex = 0;
+
+            for (int i = 0; i < Group.Length; ++i)
+            {
+                // Add The telemetry
+                int offset = AddTelemetry(Group.Sensors[i].TelemetrySensor, Group.SensorData[i], 0);
+
+                // Gather information for the raycasting
+                for (int j = 0; j < Group.Sensors[i].DistanceSensors.Length; ++j)
+                {
+                    castBatchItems.Add(new CastBatchItem()
+                    {
+                        BatchIndex = batchIndex++,
+                        ResultIndex = offset + (j * DATA_POINTS_PER_DISTANCE_SENSOR),
+                        Transform = Group.Transform[i],
+                        Stats = Group.Stats[i],
+                        Sensor = Group.Sensors[i].DistanceSensors[j],
+                        SensorData = Group.SensorData[i]
+                    });
+                }
+            }
+
+            AddDistanceSensors(castBatchItems);
         }
     }
 }

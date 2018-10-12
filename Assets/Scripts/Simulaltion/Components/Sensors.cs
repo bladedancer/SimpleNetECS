@@ -5,7 +5,15 @@ namespace Components
 {
     public class Sensors : MonoBehaviour
     {
+        public float SensorCount
+        {
+            get {
+                return this.TelemetrySensor.GetTelemetryCount()
+                    + DistanceSensors.Length * 1; // TODO OTHER FACTORS
+            }
+        }
         public DistanceSensor[] DistanceSensors;
+        public TelemetrySensor TelemetrySensor;
     }
 
     [Serializable]
@@ -19,5 +27,15 @@ namespace Components
 
         public int LayerMask;
         public Vector3 Direction;
+    }
+
+    [Serializable]
+    public struct TelemetrySensor
+    {
+        public delegate int GetTelemetryCountFn();
+        public delegate double[] GetTelemetryFn();
+
+        public GetTelemetryFn GetTelemetry;
+        public GetTelemetryCountFn GetTelemetryCount;
     }
 }

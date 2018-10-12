@@ -1,6 +1,8 @@
 ﻿using Components;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Systems;
 using Unity.Entities;
 using UnityEngine;
 
@@ -23,13 +25,35 @@ public class HerbivoreController : MonoBehaviour {
     public NetData InitalNet;
     #endregion
 
+    private MotionInput motionInput;
+
     private void Awake()
     {
         gameObjectEntity = GetComponent<GameObjectEntity>();
+        motionInput = GetComponent<MotionInput>();
     }
 
-    void Start () {
-        // Initialize the sensors
+    private int getTelemetryCount()
+    {
+        // KEEP INSYNC WITH getTelemetry
+        return 3;
+    }
+
+    private double[] getTelemetry()
+    {
+        // Probably not optimal
+        Stats stats = gameObjectEntity.EntityManager.GetComponentData<Stats>(gameObjectEntity.Entity);
+
+        return new double[]
+        {
+            motionInput.Horizontal,
+            motionInput.Vertical,
+            Math.Tanh(stats.Health / InitialHealth)
+        };
+    }
+
+    void Start() {
+        // Distance Sensors
         for (int i = 0; i < DistanceSensors.Length; ++i)
         {
             DistanceSensor sensor = DistanceSensors[i];
@@ -37,11 +61,26 @@ public class HerbivoreController : MonoBehaviour {
             Quaternion rot = Quaternion.AngleAxis(DistanceSensors[i].Angle, Vector3.up);
             DistanceSensors[i].Direction = (rot * Vector3.forward).normalized;
         }
+
+        // Telemetry Sensors
+        TelemetrySensor teleSense = new TelemetrySensor()
+        {
+            GetTelemetry = this.getTelemetry,
+            GetTelemetryCount = this.getTelemetryCount
+        };
+
+        // Sensor Component
         Sensors sensors = GetComponent<Sensors>();
         sensors.DistanceSensors = DistanceSensors;
+        sensors.TelemetrySensor = teleSense;
 
+        // Sensor Data Component
         SensorData sensorData = GetComponent<SensorData>();
-        sensorData.Data = new double[sensors.DistanceSensors.Length]; // TODO More
+        sensorData.Data = new double[
+            sensors.TelemetrySensor.GetTelemetryCount() +
+            (sensors.DistanceSensors.Length * SensorSystem.DATA_POINTS_PER_DISTANCE_SENSOR)
+        ];
+
         for (int i = 0; i < sensorData.Data.Length; ++i)
         {
             sensorData.Data[i] = 0;

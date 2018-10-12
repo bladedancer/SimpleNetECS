@@ -30,7 +30,7 @@ namespace Systems
         /// <summary>
         /// The activation function of the network. Defaults to Activcation.sigmoid.
         /// </summary>
-        private Activation.func activationFunc = Activation.sigmoid;
+        private Activation.func activationFunc = Activation.tanh;
 
         protected override void OnUpdate()
         {
@@ -38,8 +38,7 @@ namespace Systems
             {
                 double[] output = evalNet(entity.SensorData.Data, entity.Net.Data.LayerSizes, entity.Net.Data.Weights);
                 entity.MotionInput.Horizontal = (float) output[0];
-                entity.MotionInput.Vertical = (float) output[1];
-                // TODO: Save to sensor data for feedback
+                entity.MotionInput.Vertical = (float) (output[1] + 1.0f) / 2.0f;
             }
         }
 
