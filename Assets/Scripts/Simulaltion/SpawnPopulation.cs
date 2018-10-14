@@ -10,6 +10,7 @@ public class SpawnPopulation : SpawnBase{
     private float lastUpdate = float.MinValue;
 
 	void Start () {
+        base.OnStart();
         Fill();
     }
 	

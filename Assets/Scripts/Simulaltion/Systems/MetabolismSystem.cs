@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Systems
 {
+    [BurstCompile]
     [UpdateBefore(typeof(UnityEngine.Experimental.PlayerLoop.FixedUpdate))]
     class MetabolismSystem : ComponentSystem
     {
@@ -25,15 +27,16 @@ namespace Systems
 
         protected override void OnUpdate()
         {
-            // TODO penalize complexity
             for (int i = 0; i < group.Length; i++)
             {
                 Stats stats = group.Stats[i];
                 Metabolism meta = group.Metabolism[i];
 
+                float hungerFactor = Mathf.Floor(1.0f + ((DateTime.Now.Ticks - stats.LastMealTime) / (1000 * TimeSpan.TicksPerMillisecond * meta.MealtimeInterval)));
+                float healthPenalty = meta.HealthDecayRate * Time.fixedDeltaTime;
+
                 stats.Age += Time.fixedDeltaTime;
-                stats.TimeSinceLastMeal += Time.fixedDeltaTime;
-                stats.Health -= (meta.HealthDecayRate * Time.fixedDeltaTime) * Mathf.Floor(1.0f + (stats.TimeSinceLastMeal/meta.MealtimeInterval));
+                stats.Health -= healthPenalty * hungerFactor;
 
                 PostUpdateCommands.SetComponent<Stats>(group.Entity[i], stats);
 

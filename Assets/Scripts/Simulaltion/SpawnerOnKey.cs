@@ -12,9 +12,14 @@ public class SpawnerOnKey : SpawnBase {
         get;
         private set;
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    private void Start()
+    {
+        base.OnStart();
+    }
+
+    // Update is called once per frame
+    void Update () {
         if (Input.GetKey(SpawnKey))
         {
             Spawn(SpawnCount);

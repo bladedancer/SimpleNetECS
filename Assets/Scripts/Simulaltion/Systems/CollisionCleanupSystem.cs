@@ -11,6 +11,7 @@ using UnityEngine;
 
 namespace Systems
 {
+    [Unity.Burst.BurstCompile]
     [UpdateAfter(typeof(DestroySystem))]
     class CollisionCleanupSystem : ComponentSystem
     {

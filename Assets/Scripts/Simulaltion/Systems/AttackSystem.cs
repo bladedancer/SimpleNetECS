@@ -11,6 +11,7 @@ using UnityEngine;
 
 namespace Systems
 {
+    [Unity.Burst.BurstCompile]
     [UpdateBefore(typeof(DestroySystem))]
     [UpdateBefore(typeof(CollisionCleanupSystem))]
     class AttackSystem : ComponentSystem
@@ -40,10 +41,8 @@ namespace Systems
                     {
                         // Eating
                         sourceStats.Health += targetStats.Nutrition;
-                        sourceStats.TimeSinceLastMeal = 0;
-
-                        // TODO: Better refactor of fitness contributions. For now - eat more get fitter.
-                        sourceStats.Fitness += targetStats.Nutrition;
+                        sourceStats.TotalMeals += targetStats.Nutrition;
+                        sourceStats.LastMealTime = DateTime.Now.Ticks;
 
                         PostUpdateCommands.SetComponent<Stats>(data.source, sourceStats);
                         PostUpdateCommands.AddComponent<Destroy>(data.target, new Destroy());

@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Systems
 {
+    [BurstCompile]
     [UpdateBefore(typeof(MatingSystem))]
     class ParentSystem : ComponentSystem
     {

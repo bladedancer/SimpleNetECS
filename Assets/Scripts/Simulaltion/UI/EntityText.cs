@@ -10,6 +10,8 @@ public class EntityText : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        entityText.text = (simCtrl.Fittest.HasValue ? simCtrl.Fittest.Value.fitness : 0).ToString();
+        string cur = Mathf.FloorToInt(simCtrl.CurrentFittest.HasValue ? simCtrl.CurrentFittest.Value.Fitness : 0).ToString();
+        string fittest = Mathf.FloorToInt(simCtrl.Fittest.HasValue ? simCtrl.Fittest.Value.fitness : 0).ToString();
+        entityText.text = cur + " (" + fittest + ")";
 	}
 }

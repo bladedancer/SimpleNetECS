@@ -127,6 +127,7 @@ public class HerbivoreController : MonoBehaviour {
             Generation = 0,
             Aggression = InitialAggression,
             Nutrition = InitialNutrition,
+            LastMealTime = DateTime.Now.Ticks,
             MatingAge = MatingAge,
             MatingCost = MatingCost,
             MatingCoolDown = MatingCoolDown

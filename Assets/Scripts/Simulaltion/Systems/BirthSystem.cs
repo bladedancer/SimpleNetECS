@@ -21,6 +21,7 @@ namespace Systems
         public NetData netData;
     }
 
+    [Unity.Burst.BurstCompile]
     [UpdateAfter(typeof(MatingSystem))]
     class BirthSystem : ComponentSystem
     {
@@ -48,13 +49,16 @@ namespace Systems
                 Stats stats = Data.Stats[i];
 
                 // Create a child
-                ChildInfo child = new ChildInfo();
-                child.tag = stats.Tag;
-                child.container = transform.parent;
-                child.position = transform.position + new Vector3(1, 0, 1);
-                child.generation = stats.Generation + 1;
-                child.netData = embryo.netdata;
-                children.Add(child);
+                foreach (NetData netdata in embryo.netdata)
+                {
+                    ChildInfo child = new ChildInfo();
+                    child.tag = stats.Tag;
+                    child.container = transform.parent;
+                    child.position = transform.position + new Vector3(1, 0, 1);
+                    child.generation = stats.Generation + 1;
+                    child.netData = netdata;
+                    children.Add(child);
+                }
                 PostUpdateCommands.SetComponent<Stats>(Data.Entities[i], stats);
                 PostUpdateCommands.RemoveComponent<Embryo>(Data.Entities[i]);
             }

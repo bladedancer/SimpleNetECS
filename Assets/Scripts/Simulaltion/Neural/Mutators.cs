@@ -54,7 +54,6 @@ namespace Neural
         /// Takes alternate layers from the nets.
         /// No options
         /// </summary>
-/*
         public static MutatorFunc LayerCake = (nets, options) =>
         {
             if (nets.Length == 0)
@@ -63,28 +62,21 @@ namespace Neural
             }
             NetData child = nets[0].Clone();
 
-            if (!(child is FeedForward))
-            {
-                throw new Exception("LayerCake only works for FeedForward");
-            }
-
-            FeedForward ffchild = child as FeedForward;
-
             if (nets.Length >= 2)
             {
                 int offset = 0;
                 int selected = 0;
-                for (int i = 1; i < ffchild.layerSizes.Length; ++i)
+                for (int i = 1; i < child.LayerSizes.Length; ++i)
                 {
-                    int weightCount = ffchild.layerSizes[i] * (ffchild.layerSizes[i - 1] + 1 );
+                    int weightCount = child.LayerSizes[i] * (child.LayerSizes[i - 1] + 1 );
                     Array.Copy(nets[selected].Weights, offset, child.Weights, offset, weightCount);
                     selected = (selected + 1) % nets.Length;
                     offset += weightCount;
                 }
             }
-            return new List<Net>() { child };
+            return new List<NetData>() { child };
         };
-*/
+
         /// <summary>
         /// Takes a single NetData and mutates it.
         /// Options:

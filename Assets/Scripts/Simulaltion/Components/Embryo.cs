@@ -7,6 +7,6 @@ namespace Components
 {
     struct Embryo : ISharedComponentData
     {
-        public NetData netdata;
+        public NetData[] netdata;
     }
 }

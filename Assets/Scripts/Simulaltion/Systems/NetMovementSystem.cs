@@ -5,12 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Systems
 {
+    [BurstCompile]
     [UpdateAfter(typeof(SensorSystem))]
     [UpdateBefore(typeof(MovementSystem))]
     class NetMovementSystem : ComponentSystem

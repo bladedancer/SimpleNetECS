@@ -12,7 +12,8 @@ namespace Components
         public float Health;
         public float Age;
 
-        public float TimeSinceLastMeal;
+        public float TotalMeals;    // Total ever eaten
+        public long LastMealTime;
 
         public int Generation;
 

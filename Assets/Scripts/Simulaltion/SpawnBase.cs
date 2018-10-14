@@ -7,10 +7,22 @@ using UnityEngine;
 public class SpawnBase : MonoBehaviour
 {
     public SimulationController controller;
+    public SaveController saveController;
 
     public Transform parent;
     public GameObject prefab;
     public GroundGenerator ground;
+
+    private SaveController.SaveData saveData;
+
+    protected void OnStart()
+    {
+        // TODO GENERIC
+        if (saveController != null)
+        {
+            saveData = saveController.Load("cow");
+        }
+    }
 
     protected void Spawn(int count)
     {
@@ -29,11 +41,21 @@ public class SpawnBase : MonoBehaviour
             // TODO GENERIC
             if (controller != null && controller.Fittest.HasValue)
             {
+                Debug.Log("HAS FITTEST");
                 Fittest fittest = controller.Fittest.Value;
                 if (fittest.tag == obj.tag.GetHashCode() && fittest.fitness > 0)
                 {
                     obj.GetComponent<HerbivoreController>().InitalNet = fittest.net;
                 }
+            }
+            else if (saveData != null)
+            {
+                Debug.Log("Using Save Data");
+                obj.GetComponent<HerbivoreController>().InitalNet = new NetData
+                {
+                    LayerSizes = saveData.LayerSizes,
+                    Weights = saveData.Weights
+                };
             }
         }
     }

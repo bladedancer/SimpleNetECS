@@ -2,20 +2,24 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unity.Collections;
+using Unity.Burst;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
 using UnityEngine;
 
 namespace Systems
 {
+    struct Mutator
+    {
+        public Neural.MutatorFunc func;
+        public Neural.Options opts;
+    }
+
+    [BurstCompile]
     [UpdateBefore(typeof(DestroySystem))]
     [UpdateBefore(typeof(CollisionCleanupSystem))]
     class MatingSystem : ComponentSystem
     {
+        private static System.Random rand = new System.Random(DateTime.Now.Millisecond);
         private struct Group
         {
             public ComponentDataArray<CollisionComponent> Data;
@@ -24,6 +28,31 @@ namespace Systems
         }
 
         [Inject] private Group Collisions;
+
+        Mutator[] mutators = new Mutator[]
+        {
+            new Mutator {
+                func = Neural.Mutators.RandomMix,
+                opts = new Neural.Options {{ "clone", true}}
+            },
+            new Mutator {
+                func = Neural.Mutators.LayerCake,
+                opts = null
+            },
+            new Mutator {
+                func = Neural.Mutators.Average,
+                opts = null
+            },
+            new Mutator {
+                func = Neural.Mutators.SelfMutate,
+                opts = new Neural.Options {
+                    {"clone", true},
+                    {"mutationProbability", 0.01 },
+                    {"mutationFactor", 0.05 },
+                    {"mutationRange", 1000 } // If the element being mutated is 0.
+                }
+            }
+        };
 
         /// <summary>
         /// Check if you can mate.
@@ -47,7 +76,7 @@ namespace Systems
             */
             return 
                 source.Tag == target.Tag
-                && source.Fitness >= target.Fitness
+                && source.Fitness <= target.Fitness
                 && source.Age >= source.MatingAge
                 && source.Health >= source.MatingCost
                 && target.Age >= target.MatingAge
@@ -77,7 +106,7 @@ namespace Systems
                         // Create a child
                         PostUpdateCommands.AddSharedComponent<Embryo>(data.source, new Embryo
                         {
-                            netdata = mate(sourceNet, targetNet)
+                            netdata = mate(sourceNet, targetNet).ToArray()
                         });
 
                         // Update Parent (source pays the price)
@@ -89,14 +118,14 @@ namespace Systems
             }
         }
 
-        private NetData mate(Net mother, Net father)
+        private List<NetData> mate(Net weaker, Net fitter)
         {
-            return Neural.Mutators.RandomMix(new NetData[] {
-                mother.Data,
-                father.Data,
-            }, new Neural.Options() {
-                { "clone", true }
-            }).First();
+            Mutator mutator = mutators[rand.Next(0, mutators.Length)];
+            return mutator.func(
+                new NetData[] {
+                    fitter.Data,
+                    weaker.Data
+                }, mutator.opts);
         }
     }
 }
